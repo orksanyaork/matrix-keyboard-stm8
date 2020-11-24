@@ -1,10 +1,10 @@
-/**
+п»ї/**
   ******************************************************************************
   * @file    main.c
-  * @author  Орловский А.С.
+  * @author  РћСЂР»РѕРІСЃРєРёР№ Рђ.РЎ.
   * @version V3.2
   * @date    05.10.20
-  * @brief   Матричная клавиатура для пульта проверки
+  * @brief   РњР°С‚СЂРёС‡РЅР°СЏ РєР»Р°РІРёР°С‚СѓСЂР° РґР»СЏ РїСѓР»СЊС‚Р° РїСЂРѕРІРµСЂРєРё
    ******************************************************************************
 **/
 
@@ -20,45 +20,45 @@ uint8_t sixthByte;
 uint8_t row[8] = {0xfe, 0xfd, 0xfb, 0xf7, 0xef, 0xdf, 0xbf, 0x7f};
 uint8_t Otkl = 0;
 
-void SomeDelay(uint16_t DelValue) // функция задержки
+void SomeDelay(uint16_t DelValue) // С„СѓРЅРєС†РёСЏ Р·Р°РґРµСЂР¶РєРё
 {
 	for (DelValue; DelValue > 0; DelValue--);
 }
 
-void initializePorts(void) // инициализация портов МК
+void initializePorts(void) // РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРѕСЂС‚РѕРІ РњРљ
 {
         // ROWS
 	GPIO_Init (GPIOD, GPIO_PIN_ALL, GPIO_MODE_OUT_PP_HIGH_FAST); // Output push-pull, high level, 10MHz
 	// COLUMNS
 	GPIO_Init (GPIOB, GPIO_PIN_ALL, GPIO_MODE_IN_PU_NO_IT); // Input pull-up, no external interrupt
-	// SPI, сначала шлем старший байт
+	// SPI, СЃРЅР°С‡Р°Р»Р° С€Р»РµРј СЃС‚Р°СЂС€РёР№ Р±Р°Р№С‚
 	SPI_Init (SPI_FIRSTBIT_MSB, SPI_BAUDRATEPRESCALER_2, SPI_MODE_MASTER, SPI_CLOCKPOLARITY_LOW, 
 	          SPI_CLOCKPHASE_1EDGE, SPI_DATADIRECTION_1LINE_TX, SPI_NSS_HARD, (uint8_t)0x07);
 	SPI_Cmd(ENABLE);
 	// RESET
 	GPIO_Init (GPIOC, GPIO_PIN_7, GPIO_MODE_IN_PU_IT); // Input pull-up, external interrupt
-	EXTI_SetExtIntSensitivity (EXTI_PORT_GPIOC, EXTI_SENSITIVITY_RISE_ONLY); // прерывание при появлении 1 на PC7
-	enableInterrupts(); // разрешить прерывания
-	// OE регистров сдвига (инверсная логика)
+	EXTI_SetExtIntSensitivity (EXTI_PORT_GPIOC, EXTI_SENSITIVITY_RISE_ONLY); // РїСЂРµСЂС‹РІР°РЅРёРµ РїСЂРё РїРѕСЏРІР»РµРЅРёРё 1 РЅР° PC7
+	enableInterrupts(); // СЂР°Р·СЂРµС€РёС‚СЊ РїСЂРµСЂС‹РІР°РЅРёСЏ
+	// OE СЂРµРіРёСЃС‚СЂРѕРІ СЃРґРІРёРіР° (РёРЅРІРµСЂСЃРЅР°СЏ Р»РѕРіРёРєР°)
 	GPIO_Init (GPIOC, GPIO_PIN_1, GPIO_MODE_OUT_PP_HIGH_FAST); // Output push-pull, high level, 10MHz
-	GPIO_WriteLow (GPIOC, GPIO_PIN_1); // включение выходов регистров сдвига
-	// SRCLR регистра сдвига (инверсная логика)
-        GPIO_Init (GPIOC, GPIO_PIN_2, GPIO_MODE_OUT_PP_LOW_FAST); // Output push-pull, low level, 10MHz - для сброса регистров сдвига
+	GPIO_WriteLow (GPIOC, GPIO_PIN_1); // РІРєР»СЋС‡РµРЅРёРµ РІС‹С…РѕРґРѕРІ СЂРµРіРёСЃС‚СЂРѕРІ СЃРґРІРёРіР°
+	// SRCLR СЂРµРіРёСЃС‚СЂР° СЃРґРІРёРіР° (РёРЅРІРµСЂСЃРЅР°СЏ Р»РѕРіРёРєР°)
+        GPIO_Init (GPIOC, GPIO_PIN_2, GPIO_MODE_OUT_PP_LOW_FAST); // Output push-pull, low level, 10MHz - РґР»СЏ СЃР±СЂРѕСЃР° СЂРµРіРёСЃС‚СЂРѕРІ СЃРґРІРёРіР°
         SomeDelay(8000);
 	GPIO_Init (GPIOC, GPIO_PIN_2, GPIO_MODE_OUT_PP_HIGH_FAST); // Output push-pull, high level, 10MHz
-	// NSS1 для регистров сдвига (инверсная логика)
+	// NSS1 РґР»СЏ СЂРµРіРёСЃС‚СЂРѕРІ СЃРґРІРёРіР° (РёРЅРІРµСЂСЃРЅР°СЏ Р»РѕРіРёРєР°)
 	GPIO_Init (GPIOC, GPIO_PIN_3, GPIO_MODE_OUT_PP_HIGH_FAST); // Output push-pull, high level, 10MHz
-	// NSS2 для передачи на ПЛИС (инверсная логика)
+	// NSS2 РґР»СЏ РїРµСЂРµРґР°С‡Рё РЅР° РџР›РРЎ (РёРЅРІРµСЂСЃРЅР°СЏ Р»РѕРіРёРєР°)
 	GPIO_Init (GPIOC, GPIO_PIN_4, GPIO_MODE_OUT_PP_HIGH_FAST); // Output push-pull, high level, 10MHz
 }
 
 void sendBytes(uint8_t firstByte, uint8_t secondByte, uint8_t thirdByte, 
-               uint8_t fourthByte, uint8_t fifthByte, uint8_t sixthByte) // запись байтов via SPI (6 регистров сдвига - 6 байт)
+               uint8_t fourthByte, uint8_t fifthByte, uint8_t sixthByte) // Р·Р°РїРёСЃСЊ Р±Р°Р№С‚РѕРІ via SPI (6 СЂРµРіРёСЃС‚СЂРѕРІ СЃРґРІРёРіР° - 6 Р±Р°Р№С‚)
 {
 		GPIO_WriteLow (GPIOC, GPIO_PIN_3); // NSS1
 		
 		SPI_SendData (firstByte); // D10
-		while (SPI_GetFlagStatus(SPI_FLAG_TXE)== RESET) { // ждем пока буфер передачи станет пуст
+		while (SPI_GetFlagStatus(SPI_FLAG_TXE)== RESET) { // Р¶РґРµРј РїРѕРєР° Р±СѓС„РµСЂ РїРµСЂРµРґР°С‡Рё СЃС‚Р°РЅРµС‚ РїСѓСЃС‚
 		}
 		SPI_SendData (secondByte); // D5
 		while (SPI_GetFlagStatus(SPI_FLAG_TXE)== RESET) {
@@ -75,48 +75,48 @@ void sendBytes(uint8_t firstByte, uint8_t secondByte, uint8_t thirdByte,
 		SPI_SendData (sixthByte); // D1
 		while (SPI_GetFlagStatus(SPI_FLAG_TXE)== RESET) {
 		}
-		while (SPI_GetFlagStatus(SPI_FLAG_BSY) == SET) { // ждем пока устройство занято
+		while (SPI_GetFlagStatus(SPI_FLAG_BSY) == SET) { // Р¶РґРµРј РїРѕРєР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Р·Р°РЅСЏС‚Рѕ
 		}
 		
 		GPIO_WriteHigh (GPIOC, GPIO_PIN_3);
 }
 
-uint8_t getKeyNo(uint8_t row) // выставление 0 на строке и считывание столбцов
+uint8_t getKeyNo(uint8_t row) // РІС‹СЃС‚Р°РІР»РµРЅРёРµ 0 РЅР° СЃС‚СЂРѕРєРµ Рё СЃС‡РёС‚С‹РІР°РЅРёРµ СЃС‚РѕР»Р±С†РѕРІ
 {
-	GPIO_Write (GPIOD, row); // 1-8 строки	
+	GPIO_Write (GPIOD, row); // 1-8 СЃС‚СЂРѕРєРё	
 	Otkl = 0;
-	for (Otkl; Otkl < 40; Otkl++) { // если ставить меньше 25, не все кнопки срабатывают. чем больше, тем меньше частота переключения светодиода при нажатой кнопке
+	for (Otkl; Otkl < 40; Otkl++) { // РµСЃР»Рё СЃС‚Р°РІРёС‚СЊ РјРµРЅСЊС€Рµ 25, РЅРµ РІСЃРµ РєРЅРѕРїРєРё СЃСЂР°Р±Р°С‚С‹РІР°СЋС‚. С‡РµРј Р±РѕР»СЊС€Рµ, С‚РµРј РјРµРЅСЊС€Рµ С‡Р°СЃС‚РѕС‚Р° РїРµСЂРµРєР»СЋС‡РµРЅРёСЏ СЃРІРµС‚РѕРґРёРѕРґР° РїСЂРё РЅР°Р¶Р°С‚РѕР№ РєРЅРѕРїРєРµ
           SomeDelay(8000);
 	}
-	keyNo = GPIO_ReadInputData (GPIOB) & 0x3f;  // 0011 1111 маска для зануления фантомных PB6, PB7
+	keyNo = GPIO_ReadInputData (GPIOB) & 0x3f;  // 0011 1111 РјР°СЃРєР° РґР»СЏ Р·Р°РЅСѓР»РµРЅРёСЏ С„Р°РЅС‚РѕРјРЅС‹С… PB6, PB7
 	return(keyNo);
 }
 
-void sendByteFPGA(uint8_t ByteFPGA) // запись байта в ПЛИС via SPI
+void sendByteFPGA(uint8_t ByteFPGA) // Р·Р°РїРёСЃСЊ Р±Р°Р№С‚Р° РІ РџР›РРЎ via SPI
 {
 		GPIO_WriteLow (GPIOC, GPIO_PIN_4); // NSS2
 		
 		SPI_SendData (ByteFPGA); // D6
-		while (SPI_GetFlagStatus(SPI_FLAG_TXE)== RESET) { // ждем пока буфер передачи станет пуст
+		while (SPI_GetFlagStatus(SPI_FLAG_TXE)== RESET) { // Р¶РґРµРј РїРѕРєР° Р±СѓС„РµСЂ РїРµСЂРµРґР°С‡Рё СЃС‚Р°РЅРµС‚ РїСѓСЃС‚
 		}
-		while (SPI_GetFlagStatus(SPI_FLAG_BSY) == SET) { // ждем пока устройство занято
+		while (SPI_GetFlagStatus(SPI_FLAG_BSY) == SET) { // Р¶РґРµРј РїРѕРєР° СѓСЃС‚СЂРѕР№СЃС‚РІРѕ Р·Р°РЅСЏС‚Рѕ
 		}
 		
 		GPIO_WriteHigh (GPIOC, GPIO_PIN_4);
 }
 
-INTERRUPT_HANDLER(IRQ_Handler_EXTI_PORT_C, 5) // обработчик прерывания
+INTERRUPT_HANDLER(IRQ_Handler_EXTI_PORT_C, 5) // РѕР±СЂР°Р±РѕС‚С‡РёРє РїСЂРµСЂС‹РІР°РЅРёСЏ
 {
 	sendByteFPGA(0);
 	sendBytes(0,0,0,0,0,0);
         WWDG_SWReset(); // software reset, used Window watchdog (WWDG)
 }
 
-void writeByte(uint8_t Byte, uint8_t Mask) // формирование + запись байтов via SPI
+void writeByte(uint8_t Byte, uint8_t Mask) // С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ + Р·Р°РїРёСЃСЊ Р±Р°Р№С‚РѕРІ via SPI
 {
 	switch (Byte) {
 		case 1 : 
-			firstByte = firstByte ^ Mask; // сложение по модулю 2
+			firstByte = firstByte ^ Mask; // СЃР»РѕР¶РµРЅРёРµ РїРѕ РјРѕРґСѓР»СЋ 2
 			break;
 		
 		case 2 : 
@@ -142,7 +142,7 @@ void writeByte(uint8_t Byte, uint8_t Mask) // формирование + запись байтов via S
 	sendBytes(firstByte,secondByte,thirdByte,fourthByte,fifthByte,sixthByte);
 }
 
-void getMaskRow1(void) // маски нажатых клавиш в первой строке
+void getMaskRow1(void) // РјР°СЃРєРё РЅР°Р¶Р°С‚С‹С… РєР»Р°РІРёС€ РІ РїРµСЂРІРѕР№ СЃС‚СЂРѕРєРµ
 {
 	switch (keyNo) {
 		case 0x01 :
@@ -177,7 +177,7 @@ void getMaskRow1(void) // маски нажатых клавиш в первой строке
 	}
 }
 
-void getMaskRow2(void) // ПРОВЕРЬ SWIM/ROW2 JUMPER!
+void getMaskRow2(void) // РџР РћР’Р•Р Р¬ SWIM/ROW2 JUMPER!
 {
 	switch (keyNo) {
 		case 0x01 :
@@ -422,9 +422,9 @@ void getMaskRow8(void)
 	}
 }
 
-uint8_t getMask(uint8_t row) // выбор байтов для записи, в заивисмости от активной строки
+uint8_t getMask(uint8_t row) // РІС‹Р±РѕСЂ Р±Р°Р№С‚РѕРІ РґР»СЏ Р·Р°РїРёСЃРё, РІ Р·Р°РёРІРёСЃРјРѕСЃС‚Рё РѕС‚ Р°РєС‚РёРІРЅРѕР№ СЃС‚СЂРѕРєРё
 {	
-        if (keyNo == 0) { // если ничего не нажато
+        if (keyNo == 0) { // РµСЃР»Рё РЅРёС‡РµРіРѕ РЅРµ РЅР°Р¶Р°С‚Рѕ
             return(0);
         }
         
@@ -465,15 +465,15 @@ uint8_t getMask(uint8_t row) // выбор байтов для записи, в заивисмости от активн
 
 void main(void)
 {
-        for (Otkl; Otkl < 50; Otkl++) { // задержка перед стартом программы
+        for (Otkl; Otkl < 50; Otkl++) { // Р·Р°РґРµСЂР¶РєР° РїРµСЂРµРґ СЃС‚Р°СЂС‚РѕРј РїСЂРѕРіСЂР°РјРјС‹
           SomeDelay(8000);
         }
 	CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1); // f = 16 MHz
 	initializePorts();
-        sendByteFPGA(0); // обнуление перед стартом программы
+        sendByteFPGA(0); // РѕР±РЅСѓР»РµРЅРёРµ РїРµСЂРµРґ СЃС‚Р°СЂС‚РѕРј РїСЂРѕРіСЂР°РјРјС‹
 	
         uint8_t i = 0;
-	while (1) // бессконечный цикл опроса матричной клавиатуры
+	while (1) // Р±РµСЃСЃРєРѕРЅРµС‡РЅС‹Р№ С†РёРєР» РѕРїСЂРѕСЃР° РјР°С‚СЂРёС‡РЅРѕР№ РєР»Р°РІРёР°С‚СѓСЂС‹
 	{
           for (i; i < 8; i++) {
             getKeyNo(row[i]);
