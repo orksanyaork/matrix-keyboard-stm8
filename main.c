@@ -1,10 +1,10 @@
-﻿/**
+/**
   ******************************************************************************
   * @file    main.c
   * @author  Орловский А.С.
-  * @version V3.2
-  * @date    05.10.20
-  * @brief   Матричная клавиатура для пульта проверки
+  * @version V3.4
+  * @date    12.07.22
+  * @brief   Матричная клавиатура для пульта проверки БПЗ (для серии) / все КНЧ на Резерв 1 + КНЧ Резерв
    ******************************************************************************
 **/
 
@@ -17,7 +17,7 @@ uint8_t thirdByte;
 uint8_t fourthByte;
 uint8_t fifthByte;
 uint8_t sixthByte;
-uint8_t row[8] = {0xfe, 0xfd, 0xfb, 0xf7, 0xef, 0xdf, 0xbf, 0x7f};
+uint8_t row[8] = {0xfe, 0xfd, 0xfb, 0xf7, 0xef, 0xdf, 0xbf, 0x7f}; 
 uint8_t Otkl = 0;
 
 void SomeDelay(uint16_t DelValue) // функция задержки
@@ -145,34 +145,40 @@ void writeByte(uint8_t Byte, uint8_t Mask) // формирование + зап�
 void getMaskRow1(void) // маски нажатых клавиш в первой строке
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// ИБП 1 
 			sendByteFPGA(0x02);
 			writeByte (2, 0x01);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// ИБП 2 
 			sendByteFPGA(0x03);
 			writeByte (2, 0x02);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// ИБП 3 
 			sendByteFPGA(0x04);
 			writeByte (2, 0x04);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// ИБП 4 
 			sendByteFPGA(0x05);
 			writeByte (2, 0x08);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// КНЧ 7 
 			sendByteFPGA(0x19);
 			writeByte (6, 0x40);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// КНЧ Резерв - ВКЛ КНЧ 1..6 
 			sendByteFPGA(0x1a);
 			writeByte (6, 0x80);
+                        writeByte (6, 0x01);// КНЧ 1 
+			writeByte (6, 0x02);// КНЧ 2 
+			writeByte (6, 0x04);// КНЧ 3 
+			writeByte (6, 0x08);// КНЧ 4 
+			writeByte (6, 0x10);// КНЧ 5 
+			writeByte (6, 0x20);// КНЧ 6 
 			break;
 	}
 }
@@ -180,32 +186,32 @@ void getMaskRow1(void) // маски нажатых клавиш в первой
 void getMaskRow2(void) // ПРОВЕРЬ SWIM/ROW2 JUMPER!
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// КНЧ 1 
 			sendByteFPGA(0x13);
 			writeByte (6, 0x01);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// КНЧ 2 
 			sendByteFPGA(0x14);
 			writeByte (6, 0x02);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// КНЧ 3 
 			sendByteFPGA(0x15);
 			writeByte (6, 0x04);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// КНЧ 4 
 			sendByteFPGA(0x16);
 			writeByte (6, 0x08);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// КНЧ 5 
 			sendByteFPGA(0x17);
 			writeByte (6, 0x10);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// КНЧ 6 
 			sendByteFPGA(0x18);
 			writeByte (6, 0x20);
 			break;
@@ -215,32 +221,32 @@ void getMaskRow2(void) // ПРОВЕРЬ SWIM/ROW2 JUMPER!
 void getMaskRow3(void)
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// ЦАРУ1 1 
 			sendByteFPGA(0x07);
 			writeByte (5, 0x01);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// ЦАРУ1 2 
 			sendByteFPGA(0x08);
 			writeByte (5, 0x02);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// ЦАРУ1 3 
 			sendByteFPGA(0x09);
 			writeByte (5, 0x04);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// ЦАРУ1 4 
 			sendByteFPGA(0x0a);
 			writeByte (5, 0x08);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// ЦАРУ1 5 
 			sendByteFPGA(0x0b);
 			writeByte (5, 0x10);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// ЦАРУ1 6 
 			sendByteFPGA(0x0c);
 			writeByte (5, 0x20);
 			break;
@@ -250,32 +256,32 @@ void getMaskRow3(void)
 void getMaskRow4(void)
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// ОСЛFm 1 
 			sendByteFPGA(0x24);
 			writeByte (3, 0x01);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// ОСЛFm 2 
 			sendByteFPGA(0x25);
 			writeByte (3, 0x02);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// ОСЛFm 3 
 			sendByteFPGA(0x26);
 			writeByte (3, 0x04);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// ОСЛFm 4 
 			sendByteFPGA(0x27);
 			writeByte (3, 0x08);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// ОСЛFm 5 
 			sendByteFPGA(0x28);
 			writeByte (3, 0x10);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// ОСЛFm 6 
 			sendByteFPGA(0x29);
 			writeByte (3, 0x20);
 			break;
@@ -285,32 +291,32 @@ void getMaskRow4(void)
 void getMaskRow5(void)
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// ЦАРУ2 1 
 			sendByteFPGA(0x0d);
 			writeByte (4, 0x01);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// ЦАРУ2 2 
 			sendByteFPGA(0x0e);
 			writeByte (4, 0x02);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// ЦАРУ2 3 
 			sendByteFPGA(0x0f);
 			writeByte (4, 0x04);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// ЦАРУ2 4 
 			sendByteFPGA(0x10);
 			writeByte (4, 0x08);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// ЦАРУ2 5 
 			sendByteFPGA(0x11);
 			writeByte (4, 0x10);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// ЦАРУ2 6 
 			sendByteFPGA(0x12);
 			writeByte (4, 0x20);
 			break;
@@ -320,32 +326,32 @@ void getMaskRow5(void)
 void getMaskRow6(void)
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// КС2 
 			sendByteFPGA(0x23);
 			writeByte (3, 0x80);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// К0 
 			sendByteFPGA(0x21);
 			writeByte (1, 0x80);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// КС1
 			sendByteFPGA(0x22);
 			writeByte (3, 0x40);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// ИЗЛ 
 			sendByteFPGA(0x20);
 			writeByte (5, 0x40);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// ИЗП 
 			sendByteFPGA(0x01);
 			writeByte (5, 0x80);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// ИМ 
 			sendByteFPGA(0x06);
 			writeByte (4, 0x40);
 			break;
@@ -355,34 +361,40 @@ void getMaskRow6(void)
 void getMaskRow7(void)
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// КПП 1 
 			sendByteFPGA(0x1e);
 			writeByte (2, 0x10);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// КПП 2 
 			sendByteFPGA(0x1f);
 			writeByte (2, 0x20);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// СВР 
 			sendByteFPGA(0x1b);
 			writeByte (4, 0x80);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// ДСВР 1 
 			sendByteFPGA(0x1c);
 			writeByte (2, 0x40);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// ДСВР 2 
 			sendByteFPGA(0x1d);
 			writeByte (2, 0x80);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// Резерв 1 - ВКЛ КНЧ 1..6 
 			sendByteFPGA(0x2a);
 			writeByte (1, 0x01);
+			writeByte (6, 0x01);// КНЧ 1 
+			writeByte (6, 0x02);// КНЧ 2 
+			writeByte (6, 0x04);// КНЧ 3 
+			writeByte (6, 0x08);// КНЧ 4 
+			writeByte (6, 0x10);// КНЧ 5 
+			writeByte (6, 0x20);// КНЧ 6 
 			break;
 	}
 }
@@ -390,32 +402,32 @@ void getMaskRow7(void)
 void getMaskRow8(void)
 {
 	switch (keyNo) {
-		case 0x01 :
+		case 0x01 :// Резерв 2
 			sendByteFPGA(0x2b);
 			writeByte (1, 0x02);
 			break;
 		
-		case 0x02 :
+		case 0x02 :// Резерв 3 
 			sendByteFPGA(0x2c);
 			writeByte (1, 0x04);
 			break;
 		
-		case 0x04 :
+		case 0x04 :// Резерв 4 
 			sendByteFPGA(0x2d);
 			writeByte (1, 0x08);
 			break;
 		
-		case 0x08 :
+		case 0x08 :// Резерв 5 
 			sendByteFPGA(0x2e);
 			writeByte (1, 0x10);
 			break;
 		
-		case 0x10 :
+		case 0x10 :// Резерв 6 
 			sendByteFPGA(0x2f);
 			writeByte (1, 0x20);
 			break;
 			
-		case 0x20 :
+		case 0x20 :// Резерв 7 
 			sendByteFPGA(0x30);
 			writeByte (1, 0x40);
 			break;
